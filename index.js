@@ -32,10 +32,13 @@ module.exports = function(config) {
         Object.assign(localConfig,
             findConfig.require(getConfigName(), { cwd: cwd, home: false }));
 
-        cwd = path.resolve(cwd, '..');
-    } while(!localConfig.root && cwd !== '/');
+        if (localConfig.root) localConfig.root = cwd;
 
-    if (localConfig.root) localConfig.root = cwd;
+        cwd = path.resolve(cwd, '..');
+
+    } while(
+        !localConfig.root && cwd !== '/'
+    );
 
     var globalConfig = {};
     try {
