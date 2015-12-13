@@ -19,15 +19,15 @@ describe('bem-config tests', function() {
         mock.restore();
     });
 
-    it('should return config name', function() {
-        expect('bemconf').eql(config.getConfigName());
+    it('should return local config filename', function() {
+        expect('bemconf.json').eql(config.getConfigFilename());
     });
 
-    it('should return config file', function() {
-        expect('bemconf.json').eql(config.getConfigFile());
+    it('should return global config filename', function() {
+        expect('.bemconf.json').eql(config.getConfigFilename(true));
     });
 
-    it('should return global config name', function() {
+    it('should return global config path', function() {
         expect(path.resolve(tilde, '.bemconf.json')).eql(config.getGlobalConfigPath());
     });
 
@@ -80,6 +80,7 @@ describe('bem-config tests', function() {
         }).eql(config({ OPTION: '1'}));
     });
 
+    // TODO: fix moch-fs
     it('should find config a level directory up', function() {
         var scheme = {},
             newLocalDirName = path.dirname(path.resolve('..', localConfigName));
