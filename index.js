@@ -25,13 +25,18 @@ module.exports = function(config) {
         cwd = process.cwd();
 
     do {
-        Object.assign(localConfig,
-            findConfig.require(getConfigFilename(), { cwd: cwd, home: false }));
+        var possibleConfig;
+        try {
+            possibleConfig = findConfig.require(getConfigFilename(), { cwd: cwd, home: false });
+        } catch(e) {}
+
+        Object.assign(localConfig, possibleConfig);
+
+        if (localConfig.root) localConfig.root = cwd;
 
         cwd = path.resolve(cwd, '..');
-    } while(!localConfig.root && cwd !== '/');
 
-    if (localConfig.root) localConfig.root = cwd;
+    } while(!localConfig.root && cwd !== '/');
 
     var globalConfig = {};
     try {
