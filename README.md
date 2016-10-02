@@ -149,7 +149,7 @@ console.log(configs); // all found configs from all dirs
         "bem-tools": {
             "plugins": {
                 "bem-create": {
-                    "techs": [
+                    "init-techs": [
                         "css", "js"
                     ],
                     "templateFolder": "/Users/tadatuta/Sites/bem/bem-tools-create/templates",
