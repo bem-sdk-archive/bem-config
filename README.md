@@ -148,7 +148,7 @@ console.log(configs); // all found configs from all dirs
     "modules": {
         "bem-tools": {
             "plugins": {
-                "create": {
+                "bem-create": {
                     "techs": [
                         "css", "js"
                     ],
