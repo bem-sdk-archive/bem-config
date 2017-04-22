@@ -70,11 +70,9 @@ test('should return undefined if no levels in config', t => {
 test('should return undefined if no level found', t => {
     const bemConfig = config([
         {
-            levels: {
-                l1: {
-                    some: 'conf'
-                }
-            }
+            levels: [
+                { path: 'l1', some: 'conf' }
+            ]
         }
     ]);
 
@@ -84,11 +82,9 @@ test('should return undefined if no level found', t => {
 test('should return level', t => {
     const bemConfig = config([
         {
-            levels: {
-                'path/to/level': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: 'path/to/level', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -99,11 +95,9 @@ test('should return level', t => {
 test('should resolve wildcard levels', t => {
     const bemConfig = config([
         {
-            levels: {
-                'l*': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: 'l*', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -114,10 +108,10 @@ test('should resolve wildcard levels', t => {
 
 test('should resolve wildcard levels with absolute path', t => {
     const conf = {
-        levels: {},
+        levels: [],
         something: 'else'
     };
-    conf.levels[path.join(__dirname, 'mocks', 'l*')] = { test: 1 };
+    conf.levels.push({ path: path.join(__dirname, 'mocks', 'l*'), test: 1 });
     const bemConfig = config([conf]);
 
     t.deepEqual(bemConfig({ cwd: path.resolve(__dirname, 'mocks')})
@@ -127,19 +121,15 @@ test('should resolve wildcard levels with absolute path', t => {
 test('should merge levels from different configs', t => {
     const bemConfig = config([
         {
-            levels: {
-                level1: {
-                    'l1o1': 'l1v1'
-                }
-            },
+            levels: [
+                { path: 'level1', 'l1o1': 'l1v1' }
+            ],
             common: 'value'
         },
         {
-            levels: {
-                level1: {
-                    'l1o2': 'l1v2'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o2: 'l1v2' }
+            ]
         }
     ]);
 
@@ -155,8 +145,9 @@ test('should merge levels from different configs', t => {
 test('should override arrays in merged levels from different configs', t => {
     const bemConfig = config([
         {
-            levels: {
-                level1: {
+            levels: [
+                {
+                    path: 'level1',
                     techs: ['css', 'js'],
                     whatever: 'you want',
                     templates: [{
@@ -166,13 +157,14 @@ test('should override arrays in merged levels from different configs', t => {
                         key: 'val'
                     }
                 }
-            },
+            ],
             techs: ['md'],
             one: 2
         },
         {
-            levels: {
-                level1: {
+            levels: [
+                {
+                    path: 'level1',
                     techs: ['bemhtml'],
                     something: 'else',
                     templates: [{
@@ -182,7 +174,7 @@ test('should override arrays in merged levels from different configs', t => {
                         other: 'key'
                     }
                 }
-            }
+            ]
         }
     ]);
 
@@ -212,20 +204,35 @@ test('should return empty map on levelMap if no levels found', t => {
     t.deepEqual(bemConfig().levelMapSync(), {});
 });
 
-test('should return levels map', t => {
+test('should return levels map for project without libs', t => {
     const bemConfig = config([{
-        levels: {
-            l1: {
-                some: 'conf1'
-            }
-        },
+        levels: [
+            { path: 'l1', some: 'conf1' }
+        ],
+        __source: path.join(process.cwd(), path.basename(__filename))
+    }]);
+
+    const expected = {};
+    expected[path.resolve('l1')] = { path: path.resolve('l1'), some: 'conf1' };
+
+    const actual = bemConfig().levelMapSync();
+
+    t.deepEqual(actual, expected);
+});
+
+// Skipped because of mocked rc
+// `levelMapSync` creates new instance of bemConfig,
+// but all instances always returns the same data because of mock.
+test.skip('should return levels map for project and included libs', t => {
+    const bemConfig = config([{
+        levels: [
+            { path: 'l1', some: 'conf1' }
+        ],
         libs: {
             'lib1': {
-                levels: {
-                    'l1': {
-                        some: 'conf1'
-                    }
-                }
+                levels: [
+                    { path: 'l1', some2: 'conf1' }
+                ]
             }
         },
         __source: path.join(process.cwd(), path.basename(__filename))
@@ -233,18 +240,17 @@ test('should return levels map', t => {
 
     const expected = {};
     expected[path.resolve('l1')] = { some: 'conf1' };
+    expected[path.resolve('lib1/l1')] = { some: 'conf1' };
 
     const actual = bemConfig().levelMapSync();
 
-    // because of mocked rc, all instances of bemConfig has always the same data
     t.deepEqual(actual, expected);
 });
 
 test('should return globbed levels map', t => {
     const mockDir = path.resolve(__dirname, 'mocks');
     const levelPath = path.join(mockDir, 'l*');
-    const levels = {};
-    levels[levelPath] = { some: 'conf1' };
+    const levels = [{ path: levelPath, some: 'conf1' }];
     const bemConfig = config([{
         levels,
         libs: {
@@ -256,8 +262,8 @@ test('should return globbed levels map', t => {
     }]);
 
     const expected = {};
-    expected[path.join(mockDir, 'level1')] = { some: 'conf1' };
-    expected[path.join(mockDir, 'level2')] = { some: 'conf1' };
+    expected[path.join(mockDir, 'level1')] = { path: path.join(mockDir, 'level1'), some: 'conf1' };
+    expected[path.join(mockDir, 'level2')] = { path: path.join(mockDir, 'level2'), some: 'conf1' };
 
     const actual = bemConfig().levelMapSync();
 
@@ -348,28 +354,20 @@ test('should return module', t => {
 test('should not extend with configs higher then root', t => {
     const bemConfig = config([
         {
-            levels: {
-                level1: {
-                    l1o1: 'should not be used',
-                    l1o2: 'should not be used either'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o1: 'should not be used', l1o2: 'should not be used either' }
+            ]
         },
         {
-            levels: {
-                level1: {
-                    something: 'from root level',
-                    l1o1: 'should be overwritten'
-                }
-            },
-            root: true
+            root: true,
+            levels: [
+                { path: 'level1', something: 'from root level', l1o1: 'should be overwritten' }
+            ]
         },
         {
-            levels: {
-                level1: {
-                    l1o1: 'should win'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o1: 'should win' }
+            ]
         }
     ]);
 
@@ -394,17 +392,16 @@ test('should respect extendedBy from rc options', t => {
     const pathToConfig = path.resolve(__dirname, 'mocks', 'argv-conf.json');
     const actual = notStubbedBemConfig({
         defaults: {
-            levels: {
-                'path/to/level': {
-                    test1: 1,
-                    same: 'initial'
-                }
-            },
+            levels: [
+                { path: 'path/to/level', test1: 1, same: 'initial' }
+            ],
             common: 'initial',
             original: 'blah'
         },
-         extendBy: {
-            levels: { 'path/to/level': { test2: 2, same: 'new' } },
+        extendBy: {
+            levels: [
+                { path: 'path/to/level', test2: 2, same: 'new' }
+            ],
             common: 'overriden',
             extended: 'yo'
         },
