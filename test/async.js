@@ -79,11 +79,9 @@ test('should return undefined if no levels in config', async t => {
 test('should return undefined if no level found', async t => {
     const bemConfig = config([
         {
-            levels: {
-                l1: {
-                    some: 'conf'
-                }
-            }
+            levels: [
+                { path: 'l1', some: 'conf'             }
+            ]
         }
     ]);
 
@@ -95,11 +93,9 @@ test('should return undefined if no level found', async t => {
 test('should return level if no __source provided', async t => {
     const bemConfig = config([
         {
-            levels: {
-                'path/to/level': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: 'path/to/level', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -112,11 +108,9 @@ test('should return level if no __source provided', async t => {
 test('should return level with __source', async t => {
     const bemConfig = config([
         {
-            levels: {
-                'path/to/level': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: 'path/to/level', test: 1 }
+            ],
             something: 'else',
             __source: path.join(process.cwd(), path.basename(__filename))
         }
@@ -130,11 +124,9 @@ test('should return level with __source', async t => {
 test('should resolve wildcard levels', async t => {
     const bemConfig = config([
         {
-            levels: {
-                'l*': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: 'l*', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -152,10 +144,10 @@ test('should resolve wildcard levels', async t => {
 
 test('should resolve wildcard levels with absolute path', async t => {
     const conf = {
-        levels: {},
+        levels: [],
         something: 'else'
     };
-    conf.levels[path.join(__dirname, 'mocks', 'l*')] = { test: 1 };
+    conf.levels = [{ path: path.join(__dirname, 'mocks', 'l*'), test: 1 }];
     const bemConfig = config([conf]);
 
     t.deepEqual(await bemConfig({ cwd: path.resolve(__dirname, 'mocks')})
@@ -166,8 +158,7 @@ test('should resolve wildcard levels with absolute path', async t => {
 test('should return globbed levels map', async t => {
     const mockDir = path.resolve(__dirname, 'mocks');
     const levelPath = path.join(mockDir, 'l*');
-    const levels = {};
-    levels[levelPath] = { some: 'conf1' };
+    const levels = [{path: levelPath, some: 'conf1'}];
     const bemConfig = config([{
         levels,
         libs: {
@@ -179,8 +170,8 @@ test('should return globbed levels map', async t => {
     }]);
 
     const expected = {};
-    expected[path.join(mockDir, 'level1')] = { some: 'conf1' };
-    expected[path.join(mockDir, 'level2')] = { some: 'conf1' };
+    expected[path.join(mockDir, 'level1')] = { path: path.join(mockDir, 'level1'), some: 'conf1' };
+    expected[path.join(mockDir, 'level2')] = { path: path.join(mockDir, 'level2'), some: 'conf1' };
 
     const actual = await bemConfig().levelMap();
 
@@ -190,11 +181,9 @@ test('should return globbed levels map', async t => {
 test('should respect absolute path for level', async t => {
     const bemConfig = config([
         {
-            levels: {
-                '/path/to/level': {
-                    test: 1
-                }
-            },
+            levels: [
+                { path: '/path/to/level', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -207,11 +196,9 @@ test('should respect absolute path for level', async t => {
 test('should respect "." path', async t => {
     const bemConfig = config([
         {
-            levels: {
-                '.': {
-                    test: 1
-                }
-            },
+            levels: [
+               { path:  '.', test: 1 }
+            ],
             something: 'else'
         }
     ]);
@@ -224,19 +211,15 @@ test('should respect "." path', async t => {
 test('should return extended level config merged from different configs', async t => {
     const bemConfig = config([
         {
-            levels: {
-                level1: {
-                    'l1o1': 'l1v1'
-                }
-            },
+            levels: [
+                { path: 'level1', l1o1: 'l1v1' }
+            ],
             common: 'value'
         },
         {
-            levels: {
-                level1: {
-                    'l1o2': 'l1v2'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o2: 'l1v2' }
+            ]
         }
     ]);
 
@@ -254,28 +237,20 @@ test('should return extended level config merged from different configs', async 
 test('should not extend with configs higher then root', async t => {
     const bemConfig = config([
         {
-            levels: {
-                level1: {
-                    l1o1: 'should not be used',
-                    l1o2: 'should not be used either'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o1: 'should not be used', l1o2: 'should not be used either' }
+            ]
         },
         {
-            levels: {
-                level1: {
-                    something: 'from root level',
-                    l1o1: 'should be overwritten'
-                }
-            },
-            root: true
+            root: true,
+            levels: [
+                { path: 'level1', something: 'from root level', l1o1: 'should be overwritten' }
+            ]
         },
         {
-            levels: {
-                level1: {
-                    l1o1: 'should win'
-                }
-            }
+            levels: [
+                { path: 'level1', l1o1: 'should win' }
+            ]
         }
     ]);
 
@@ -303,18 +278,14 @@ test('should return empty map on levelMap if no levels found', async t => {
 
 test('should return levels map', async t => {
     const bemConfig = config([{
-        levels: {
-            l1: {
-                some: 'conf1'
-            }
-        },
+        levels: [
+            { path: 'l1', some: 'conf1' }
+        ],
         libs: {
             lib1: {
-                levels: {
-                    l1: {
-                        some: 'conf1'
-                    }
-                }
+                levels: [
+                    { path: 'l1', some: 'conf1' }
+                ]
             }
         }
     }]);
@@ -322,7 +293,7 @@ test('should return levels map', async t => {
     const actual = await bemConfig().levelMap();
 
     const expected = {};
-    expected[path.resolve('l1')] = { some: 'conf1' };
+    expected[path.resolve('l1')] = { path: path.resolve('l1'), some: 'conf1' };
 
     // because of mocked rc, all instances of bemConfig has always the same data
     t.deepEqual(actual, expected);
@@ -456,17 +427,16 @@ test('should respect extendedBy from rc options', async t => {
     const pathToConfig = path.resolve(__dirname, 'mocks', 'argv-conf.json');
     const actual = await notStubbedBemConfig({
         defaults: {
-            levels: {
-                'path/to/level': {
-                    test1: 1,
-                    same: 'initial'
-                }
-            },
+            levels: [
+                { path: 'path/to/level', test1: 1, same: 'initial' }
+            ],
             common: 'initial',
             original: 'blah'
         },
          extendBy: {
-            levels: { 'path/to/level': { test2: 2, same: 'new' } },
+            levels: [
+                { path: 'path/to/level', test2: 2, same: 'new' }
+            ],
             common: 'overriden',
             extended: 'yo'
         },
