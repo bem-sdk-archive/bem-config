@@ -2,7 +2,9 @@
 
 const path = require('path');
 const test = require('ava');
+const mockfs = require('mock-fs');
 const proxyquire = require('proxyquire');
+
 const notStubbedBemConfig = require('..');
 
 function config(conf) {
@@ -12,6 +14,11 @@ function config(conf) {
         }
     });
 }
+
+test.afterEach.always(t => {
+    console.log('cleanup');
+    mockfs.restore();
+});
 
 // configs()
 test('should return empty config', async t => {
@@ -423,7 +430,16 @@ test('should return common config if no levels provided', async t => {
     t.deepEqual(actual, { common: 'value' });
 });
 
-test('should respect extendedBy from rc options', async t => {
+test.only('should respect extendedBy from rc options', async t => {
+    // 0 &&
+    mockfs({
+        [path.resolve(__dirname, 'mocks')]: {
+            'argv-conf.json': '{"argv":true}',
+            'level1': {},
+            'level2': {}
+        }
+    });
+
     const pathToConfig = path.resolve(__dirname, 'mocks', 'argv-conf.json');
     const actual = await notStubbedBemConfig({
         defaults: {
@@ -433,7 +449,7 @@ test('should respect extendedBy from rc options', async t => {
             common: 'initial',
             original: 'blah'
         },
-         extendBy: {
+        extendBy: {
             levels: [
                 { path: 'path/to/level', test2: 2, same: 'new' }
             ],

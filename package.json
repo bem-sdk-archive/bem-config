@@ -43,7 +43,7 @@
     "pinkie-promise": "^2.0.1"
   },
   "devDependencies": {
-    "ava": "^0.18.2",
+    "ava": "^0.19.1",
     "babel-eslint": "^7.2.0",
     "coveralls": "^2.11.9",
     "eslint": "^3.0.0",
