@@ -148,8 +148,8 @@ console.log(configs); // all found configs from all dirs
     "modules": {
         "bem-tools": {
             "plugins": {
-                "create": {
-                    "techs": [
+                "bem-create": {
+                    "init-techs": [
                         "css", "js"
                     ],
                     "templateFolder": "path/to/templates",
