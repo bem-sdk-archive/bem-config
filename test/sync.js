@@ -49,6 +49,16 @@ test('should return project root', t => {
     t.deepEqual(bemConfig().rootSync(), path.dirname(__filename));
 });
 
+test('should respect proper project root', t => {
+    const bemConfig = config([
+        { test: 1, root: true, __source: 'some/path' },
+        { test: 2, root: true, __source: __filename },
+        { other: 'field', __source: 'some/other/path' }
+    ]);
+
+    t.deepEqual(bemConfig().rootSync(), path.dirname(__filename));
+});
+
 // get()
 test('should return merged config', t => {
     const bemConfig = config([
